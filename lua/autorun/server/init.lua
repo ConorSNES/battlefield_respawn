@@ -107,7 +107,8 @@ hook.Add( "PlayerSelectSpawn", "bfres_selectspawn", function( ply )
 	end
 end )
 
-hook.Add( "OnGamemodeLoaded", "bfres_isUsed", function()
+hook.Add( "PostGamemodeLoaded", "bfres_isUsed", function()
+	-- alright, trying again
 	if not GM.IsSandboxDerived then
 		print("Battlefield respawn disabled serverside as gamemode is " .. GM.Name)
 		AllowSelect:SetBool(false)
