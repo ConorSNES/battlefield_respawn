@@ -110,7 +110,7 @@ end )
 hook.Add( "PostGamemodeLoaded", "bfres_isUsed", function()
 	-- alright, trying again
 	if engine.ActiveGamemode() != "sandbox" then
-		print("Battlefield respawn disabled serverside as gamemode is " .. GM.Name)
+		print("Battlefield respawn disabled serverside as gamemode is " .. engine.ActiveGamemode())
 		AllowSelect:SetBool(false)
 	end
 end )
