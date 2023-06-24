@@ -1,13 +1,12 @@
 # Battlefield-ish respawn
 A mod for Gmod that allows you to select one of the spawnpoints on a map
+
 (c) ConorSNES 2023
 
 ## Description
 When a player dies, they can select a spawnpoint on a visual map popup. Upon respawning, they respawn at the selected point.
-This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs). The mod will automatically break execution if the gamemode is not sandbox.
-
-Upon rendering the map for the first time, the data sent from the server to the client is at n-length scale with the amount of spawnpoints in the current level. This has been optimised where possible.
-Addon should be server-secure, unless you want to hide where your spawnpoints are.
+This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs). 
+The mod will automatically break execution if the gamemode is not sandbox.
 
 ## Known issues
 - Addon is nonfunctional on gamemodes other than sandbox
