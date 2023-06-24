@@ -1,5 +1,6 @@
 # Battlefield-ish respawn
 A mod for Gmod that allows you to select one of the spawnpoints on a map
+
 (c) ConorSNES 2023
 
 ## Description
