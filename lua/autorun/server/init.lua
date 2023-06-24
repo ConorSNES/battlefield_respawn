@@ -1,6 +1,4 @@
-if GM.ThisClass != "gamemode_sandbox" then
-	print("Battlefield respawn disabled serverside as gamemode is " .. GM.ThisClass)
-end
+
 
 util.AddNetworkString( "bfres_showUI" )
 util.AddNetworkString( "bfres_respawnIndex" )
@@ -106,6 +104,13 @@ end )
 hook.Add( "PlayerSelectSpawn", "bfres_selectspawn", function( ply )
 	if AllowSelect:GetBool() and g[ply:AccountID()] != nil then
 		return spawns[ g[ply:AccountID()] ]
+	end
+end )
+
+hook.Add( "OnGamemodeLoaded", "bfres_isUsed", function()
+	if not GM.IsSandboxDerived then
+		print("Battlefield respawn disabled serverside as gamemode is " .. GM.Name)
+		AllowSelect:SetBool(false)
 	end
 end )
 

@@ -1,6 +1,4 @@
-if GM.ThisClass != "gamemode_sandbox" then
-	print("Battlefield respawn disabled serverside as gamemode is " .. GM.ThisClass)
-end
+
 
 if not file.Exists("bfres", "DATA") then
 	file.CreateDir("bfres", "DATA")
