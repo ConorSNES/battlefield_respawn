@@ -8,6 +8,11 @@ When a player dies, they can select a spawnpoint on a visual map popup. Upon res
 This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs). 
 The mod will automatically break execution if the gamemode is not sandbox.
 
+### CVARs
+- [SERVER] bfres_allowselect
+- bfres_showui
+- bfres_uiscale
+
 ## Known issues
 - Addon is nonfunctional on gamemodes other than sandbox
 	- This is as it is due to unpredictible hook structuring
