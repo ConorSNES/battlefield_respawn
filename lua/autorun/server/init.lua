@@ -103,6 +103,9 @@ end )
 
 hook.Add( "PlayerSelectSpawn", "bfres_selectspawn", function( ply )
 	if AllowSelect:GetBool() and g[ply:AccountID()] != nil then
+		if not spawns[ g[ply:AccountID()] ]:IsValid() then
+			GetSpawns()
+		end
 		return spawns[ g[ply:AccountID()] ]
 	end
 end )
