@@ -6,7 +6,7 @@ A mod for Gmod that allows you to select one of the spawnpoints on a map
 ## Description
 When a player dies, they can select a spawnpoint on a visual map popup. Upon respawning, they respawn at the selected point.
 This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs). 
-The mod will automatically break execution if the gamemode is not sandbox.
+The mod will automatically deactivate if the gamemode is not sandbox.
 
 ### CVARs
 - [SERVER] bfres_allowselect
