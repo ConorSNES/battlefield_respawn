@@ -246,6 +246,13 @@ end
 
 concommand.Add( "bfres_retakemap", retakemap, nil, "Retakes the respawn dialog map" )
 
+function resetspawn()
+	-- Reset spawn to default arrangement
+	chgselected(0)
+end
+
+concommand.Add( "bfres_resetspawn", resetspawn, nil, "Reset spawn selection" )
+
 function reset()
 	-- Reset the widget
 	resHost = nil
@@ -269,5 +276,6 @@ hook.Add("AddToolMenuCategories", "bfres_optionsmake", function()
 		form:NumSlider("UI scale", "bfres_uiscale", 0, 1, 2)
 		form:Help("Note: Changing the UI scale may affect map image quality.")
 		form:Button("Retake map image", "bfres_retakemap")
+		form:Button("Reset my spawn preferences", "bfres_resetspawn")
 	end )
 end )
