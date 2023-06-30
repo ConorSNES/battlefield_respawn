@@ -1,17 +1,26 @@
 # Battlefield-ish respawn
-A mod for Gmod that allows you to select one of the spawnpoints on a map
+A mod for Gmod that allows you to select one of the spawnpoints on a map to respawn to
 
 (c) ConorSNES 2023
 
 ## Description
-When a player dies, they can select a spawnpoint on a visual map popup. Upon respawning, they respawn at the selected point.
-This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs). 
+When a player dies, they can select a spawnpoint on a visual map popup. Upon initiating a respawn, they respawn at the selected point.
+This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs related to net messages). 
 The mod will automatically deactivate if the gamemode is not sandbox.
 
 ### CVARs
 - [SERVER] bfres_allowselect
+	- Enable/disable use of spawnpoint selection
 - bfres_showui
+	- Should UI be shown on death? Your preference of spawnpoint will be saved
 - bfres_uiscale
+	- Scale of UI relative to screen space
+- [FUNC] bfres_retakemap
+	- Retake the map the next time the UI is shown
+- [FUNC] bfres_resetspawn
+	- Reset spawn preference. If you have none selected, you will fall back to the typical random spawn selection
+- [FUNC] bfres_reset
+	- Reset UI fully on client-side
 
 ## Known issues
 - Addon is nonfunctional on gamemodes other than sandbox

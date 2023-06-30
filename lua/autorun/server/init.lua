@@ -86,9 +86,8 @@ hook.Add( "DoPlayerDeath", "bfres_ondeath", function( ply )
 			if #spawns <= 0 then
 				GetSpawns()
 			end
-			-- Get the vectors for the spawns bc the spawns don't exist on the client 
-			-- Integer is efficienter:tm:
-			-- also min/max for hammer editor is 15 bit, unless you cracked it 
+			-- Get the vectors for the spawns bc the spawns don't exist on the client
+			-- also min/max for hammer editor is 15 bit (2^15), unless you cracked it or something idk
 			for k, v in ipairs( spawns ) do
 				local pos = v:GetPos()
 				net.WriteInt( math.floor(pos.x), 15)
@@ -124,5 +123,7 @@ net.Receive( "bfres_respawnIndex", function( len, ply )
 end )
 
 net.Receive( "bfres_respawnNow", function( len, ply )
-	ply:Spawn()
+	if not ply:Alive() then	-- whoopsies (issue 1, teleportation exploit)
+		ply:Spawn()
+	end
 end )

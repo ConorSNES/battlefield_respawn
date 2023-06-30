@@ -68,7 +68,7 @@ function setup( msg )
 		end
 		-- The scale has a minimum of 1000 
 		scaleMap = math.max( maxis, -minis, 0 ) + 500
-		resText:SetText( "Registered " .. #msg / 2 .. " spawnpoints.\nClick an icon to select spawnpoint." )
+		resText:SetText( "Registered " .. #msg / 2 .. " spawnpoints.\nClick an icon to select spawnpoint. Select none to spawn somewhere random." )
 	end
 end
 
@@ -114,9 +114,33 @@ end
 
 
 function chgselected( id )
+	-- The easy part
 	selected = id
-	local selpos = coords[selected]
-	resText:SetText( "Selected location: (" .. selpos.x .. ", " .. selpos.y .. ")\nClick anywhere outside window to respawn." )
+	-- The UI
+	if resText then
+		-- Update text element on UI
+		if (selected > 0 and selected <= #coords) then -- forgot about the possibility of id being oob, yipe
+			local selpos = coords[selected]
+			resText:SetText( "Selected location: (" .. selpos.x .. ", " .. selpos.y .. ")\nClick anywhere outside window to respawn." )
+		else
+			resText:SetText( "No location selected. Random location will be picked instead.\nClick anywhere outside window to respawn." )
+		end
+	end
+	if resIcons then
+		-- Correct the icon visuals on the UI
+		for _, v2 in ipairs( resIcons:GetChildren() ) do
+			if v2.bfres_id then
+				if v2.bfres_id == selected then
+					-- Active location
+					v2:SetImage( iconFN1 )
+				else
+					-- Inactive location
+					v2:SetImage( iconFN0 )
+				end
+			end
+		end
+	end		-- gnarly 4 end chain
+	-- Send using net
 	sendselected()
 end
 
@@ -160,7 +184,10 @@ function ShowUI( msg )
 		quitter:SetSize( ScrW(), ScrH() )
 		quitter:SetAlpha( 0 )
 		function quitter:DoClick()
-			resHost:Close()
+			if resHost:IsVisible() then
+				-- quitter shouldn't do anything if the menu is already hidden
+				resHost:Close()
+			end
 		end
 
 		resMap:SetSize( wid, hei )
@@ -192,14 +219,7 @@ function ShowUI( msg )
 			newic.bfres_id = i
 
 			function newic:DoClick()
-				--print("yee-haw " .. self.bfres_id)
-				self:SetImage( iconFN1 )
 				chgselected( self.bfres_id )    -- Change the selected spawnpoint to this one
-				for i2, v2 in ipairs( resIcons:GetChildren() ) do
-					if i2 != selected + 1 and v2.SetImage != nil then
-						v2:SetImage( iconFN0 )
-					end
-				end
 			end
 			postcalc = mapToScreenCoords( v )
 			newic:SetPos( postcalc.x-8, postcalc.y-8 )
@@ -248,7 +268,7 @@ concommand.Add( "bfres_retakemap", retakemap, nil, "Retakes the respawn dialog m
 
 function resetspawn()
 	-- Reset spawn to default arrangement
-	chgselected(0)
+	chgselected( 0 )
 end
 
 concommand.Add( "bfres_resetspawn", resetspawn, nil, "Reset spawn selection" )
