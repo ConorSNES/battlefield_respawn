@@ -80,20 +80,27 @@ end )
 
 hook.Add( "DoPlayerDeath", "bfres_ondeath", function( ply )
 	if AllowSelect:GetBool() then
-		net.Start("bfres_showUI")
+		local st		-- staggering indicator
 		if g[ply:AccountID()] == nil or g[ply:AccountID()] == 0 then
 			-- Try again to get a log of all spawns if there are none currently here
 			if #spawns <= 0 then
 				GetSpawns()
 			end
+
+			-- Manage net
+			st = net.Start("bfres_showUI")	-- Activation only as required
+
 			-- Get the vectors for the spawns bc the spawns don't exist on the client
 			-- also min/max for hammer editor is 15 bit (2^15), unless you cracked it or something idk
 			for k, v in ipairs( spawns ) do
+				if net.BytesLeft() and net.BytesLeft() < 31 then break end -- fix for memoryfull
 				local pos = v:GetPos()
 				net.WriteInt( math.floor(pos.x), 15)
 				net.WriteInt( math.floor(pos.y), 15)
 			end
 		end
+
+		if not st then net.Start("bfres_showUI") end -- Catch-all
 
 		net.Send( ply )
 		g[ply:AccountID()] = nil
