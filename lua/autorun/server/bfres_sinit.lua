@@ -1,11 +1,9 @@
-
-
+-- net strings
 util.AddNetworkString( "bfres_showUI" )
 util.AddNetworkString( "bfres_respawnIndex" )
 util.AddNetworkString( "bfres_respawnNow" )
 
-
-
+-- locals
 local g = {} -- Stored table of user's selected spawnlocation
 local spawns = {}
 local AllowSelect = CreateConVar( "bfres_allowselect", 1, nil, "Allow/Disallow selection of spawn point using bfres window", 0, 1)
