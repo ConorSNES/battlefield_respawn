@@ -1,7 +1,7 @@
 # Battlefield-ish respawn
 A mod for Gmod that allows you to select one of the spawnpoints on a map to respawn to
 
-(c) ConorSNES 2023
+(c) ConorSNES 2023-2024
 
 ## Description
 When a player dies, they can select a spawnpoint on a visual map popup. Upon initiating a respawn, they respawn at the selected point.
