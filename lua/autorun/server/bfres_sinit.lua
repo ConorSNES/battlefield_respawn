@@ -76,6 +76,8 @@ local spawns = {}
 function spawns:fetch()
 	if spawns._inner == nil then
 		spawns:force_reload()
+	elseif #(spawns._inner) > 0 and spawns._inner[0] == NULL then -- fix for NULL entity bug
+		spawns:force_reload() -- I understand this seems redundant with the previous branch. However, using "or" would result in a nil error.
 	end
 	return spawns._inner
 end

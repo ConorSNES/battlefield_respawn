@@ -34,6 +34,7 @@ local function mapToScreenCoords( v2 )
 end
 
 local function setup( msg )
+
 	-- Assign a buncha variables like the coords, the mapscale, etcs
 	-- Store the coords
 	for k, v in ipairs(msg) do
@@ -50,24 +51,24 @@ local function setup( msg )
 	   resText:SetText( "ERROR: No info_player_start or similar entities on map!\n\tAre you on a custom gamemode map?" )
 	else
 		-- Average a focal point for the map
-		for k, v in ipairs(coords) do
+		for _, v in ipairs(coords) do
 			focal = focal + v
 		end
 		focal.z = 0
 		focal = focal / #coords
 
 		-- Get map scale from all spawn positions
-		minis = 0
-		maxis = 0
+		local minis = 0
+		local maxis = 0
 		for i, p in ipairs(coords) do
-			final = Vector(p.x, p.y)    -- bc apparently I can't just pass these by value
+			local final = Vector(p.x, p.y)    -- bc apparently I can't just pass these by value
 			final.y = -final.y
 			final = final - focal
 			minis = math.min( final.x, final.y, minis )
 			maxis = math.max( final.x, final.y, maxis )
 		end
 		-- The scale has a minimum of 1000 
-		scaleMap = math.max( maxis, -minis, 0 ) + 500
+		scaleMap = math.max( maxis, -minis, 500 ) --+ 500
 		resText:SetText( "Registered " .. #msg / 2 .. " spawnpoints.\nClick an icon to select spawnpoint. Select none to spawn somewhere random." )
 	end
 end
@@ -75,8 +76,8 @@ end
 local function captureNew( fname )
 	-- Capture a new snapshot of the world from top down, save to file
 	-- Codependent on internal scale values (patch better ways later snuss)
-	mapbounds = Vector( scaleMap * ratio, scaleMap  )
-	uis = uiScale:GetFloat()
+	local mapbounds = Vector( scaleMap * ratio, scaleMap  )
+	local uis = uiScale:GetFloat()
 
 	render.Clear( 0, 0, 0, 0 )
 	render.ClearStencil()
@@ -99,7 +100,7 @@ local function captureNew( fname )
 		dopostprocess = false,
 		drawviewmodel = false,
 	} )
-	data = render.Capture( {
+	local data = render.Capture( {
 		format =    "png",
 		alpha =     true,
 		w =         ScrW() * uis,
@@ -173,6 +174,7 @@ local function ShowUI( msg )
 		resHost:SetSize( wid + 8, hei + 32 )
 		resHost:Center()
 		resHost:SetDeleteOnClose( false )
+		resHost:ShowCloseButton( false )
 		function resHost:Close()
 			net.Start("bfres_respawnNow")
 			net.SendToServer()
