@@ -1,7 +1,7 @@
 
 
 if not file.Exists("bfres", "DATA") then
-	file.CreateDir("bfres", "DATA")
+	file.CreateDir("bfres")
 end
 
 local doShowUI = CreateClientConVar("bfres_doshowui", 1, true, false, "Show the bfres UI on death", 0, 1)
@@ -17,13 +17,13 @@ local focal = Vector()      -- Map focal point
 local selected = 0
 local retake = true
 
-ratio = ScrW() / ScrH() -- Screen size ratio
+local ratio = ScrW() / ScrH() -- Screen size ratio
 
 -- Filename of respawn position icon (non/live)
 local iconFN0 = "bfres01.png"
 local iconFN1 = "bfres02.png"
 
-function mapToScreenCoords( v2 )
+local function mapToScreenCoords( v2 )
 	-- after messing about this for a couple hours, I found out a really specific transformation of the original coord is required bc we rotate the map by 90deg
 	-- also, this equ. is long and awful
 	local uis = uiScale:GetFloat()
@@ -33,7 +33,7 @@ function mapToScreenCoords( v2 )
 	)
 end
 
-function setup( msg )
+local function setup( msg )
 	-- Assign a buncha variables like the coords, the mapscale, etcs
 	-- Store the coords
 	for k, v in ipairs(msg) do
@@ -72,7 +72,7 @@ function setup( msg )
 	end
 end
 
-function captureNew( fname )
+local function captureNew( fname )
 	-- Capture a new snapshot of the world from top down, save to file
 	-- Codependent on internal scale values (patch better ways later snuss)
 	mapbounds = Vector( scaleMap * ratio, scaleMap  )
@@ -111,9 +111,15 @@ function captureNew( fname )
 
 end
 
+local function sendselected()
+	net.Start( "bfres_respawnIndex" )
+	net.WriteUInt( selected, 8 )
+	net.SendToServer()
+end
 
+sendselected() -- do this once just to let the server know gmod deleted all the locals again
 
-function chgselected( id )
+local function chgselected( id )
 	-- The easy part
 	selected = id
 	-- The UI
@@ -144,31 +150,23 @@ function chgselected( id )
 	sendselected()
 end
 
-function sendselected()
-	net.Start( "bfres_respawnIndex" )
-	net.WriteUInt( selected, 8 )
-	net.SendToServer()
-end
+local function ShowUI( msg )
 
-sendselected() -- do this once just to let the server know gmod deleted all the locals again
-
-function ShowUI( msg )
-
-	if selected != 0 then
+	if selected ~= 0 then
 		sendselected()
 	end
 
 	if not doShowUI:GetBool() then return end
 
 	if resHost == nil then
-		uis = uiScale:GetFloat()
+		local uis = uiScale:GetFloat()
 		local quitter = vgui.Create( "DButton" )    -- literally use an invisible button to check if the user has clicked out the window
 		resHost = vgui.Create( "DFrame" )
 		resMap = vgui.Create( "DImage", resHost )
 		resIcons = vgui.Create( "DPanel", resHost )
 		resText = vgui.Create( "DLabel", resIcons )
-		wid = ScrW() * uis
-		hei = ScrH() * uis
+		local wid = ScrW() * uis
+		local hei = ScrH() * uis
 
 		-- And thus, the massive config string begins
 		resHost:SetTitle( "Respawn Dialog" )
@@ -206,12 +204,12 @@ function ShowUI( msg )
 		resText:AlignBottom(4)
 		resText:SetText( "ERROR: This text should not appear! \n\tIf it does, please send a bug report to the github with\n\ta method and related console errors if they occur." )
 
-		if msg != nil then
+		if msg ~= nil then
 			setup( msg )
 		end
 
 		for i, v in ipairs(coords) do
-			newic = resIcons:Add( "DImageButton" )
+			local newic = resIcons:Add( "DImageButton" )
 
 			newic:SetImage( iconFN0 )
 			newic:SetSize(16, 16)
@@ -221,7 +219,7 @@ function ShowUI( msg )
 			function newic:DoClick()
 				chgselected( self.bfres_id )    -- Change the selected spawnpoint to this one
 			end
-			postcalc = mapToScreenCoords( v )
+			local postcalc = mapToScreenCoords( v )
 			newic:SetPos( postcalc.x-8, postcalc.y-8 )
 		end
 
@@ -247,7 +245,7 @@ end
 
 net.Receive( "bfres_showUI", function( len, ply )
 	local msg = {}
-	if len != nil and len > 0 then
+	if len ~= nil and len > 0 then
 		for i = 1, (len / 15) do
 			msg[i] = net.ReadInt(15)
 		end
@@ -259,21 +257,21 @@ net.Receive( "bfres_showUI", function( len, ply )
 	end )
 end )
 
-function retakemap()
+local function retakemap()
 	-- Mark the map to be retaken
 	retake = true
 end
 
 concommand.Add( "bfres_retakemap", retakemap, nil, "Retakes the respawn dialog map" )
 
-function resetspawn()
+local function resetspawn()
 	-- Reset spawn to default arrangement
 	chgselected( 0 )
 end
 
 concommand.Add( "bfres_resetspawn", resetspawn, nil, "Reset spawn selection" )
 
-function reset()
+local function reset()
 	-- Reset the widget
 	resHost = nil
 	resMap = nil
@@ -290,7 +288,7 @@ concommand.Add("bfres_reset", reset, nil, "Reset all clientside variables")
 -- en finale, toolmenu interface
 hook.Add("AddToolMenuCategories", "bfres_optionsmake", function()
 	spawnmenu.AddToolCategory("Options", "ConorSNES", "ConorSNES")
-	spawnmenu.AddToolMenuOption("Options", "ConorSNES", "bfres_config", "Bfres Config", "", "", function( form )
+	spawnmenu.AddToolMenuOption("Options", "ConorSNES", "bfres_config", "Bfres Config", nil, nil, function( form )
 		-- This is the menu.
 		form:CheckBox("Show the UI on death", "bfres_doshowui")
 		form:NumSlider("UI scale", "bfres_uiscale", 0, 1, 2)
