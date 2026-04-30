@@ -25,7 +25,7 @@ local iconFN1 = "bfres02.png"
 
 function mapToScreenCoords( v2 )
 	-- after messing about this for a couple hours, I found out a really specific transformation of the original coord is required bc we rotate the map by 90deg
-	-- also, this eq. is long and awful
+	-- also, this equ. is long and awful
 	local uis = uiScale:GetFloat()
 	return Vector(
 		uis * ScrW() * ( ( ( v2.x - focal.x ) / (2 * scaleMap * ratio) ) + .5 ),
