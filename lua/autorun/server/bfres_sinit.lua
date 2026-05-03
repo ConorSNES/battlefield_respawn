@@ -1,5 +1,10 @@
 -- net strings
 util.AddNetworkString( "bfres_showUI" )
+util.AddNetworkString( "bfres_hideUI" )
+
+util.AddNetworkString( "bfres_requestSpawns" )
+util.AddNetworkString( "bfres_handleSpawns" )
+
 util.AddNetworkString( "bfres_respawnIndex" )
 util.AddNetworkString( "bfres_respawnNow" )
 
@@ -83,56 +88,58 @@ function spawns:fetch()
 end
 function spawns:force_reload()
 	spawns._inner = GetSpawns()
+	print("Reloaded inner spawns! Discovered " .. #(spawns._inner) .. "!!")
 end
-local AllowSelect = CreateConVar( "bfres_allowselect", 1, nil, "Allow/Disallow selection of spawn point using bfres window", 0, 1)
+function spawns:force_fetch()
+	spawns:force_reload()
+	return spawns._inner
+end
 
+---@diagnostic disable-next-line: param-type-mismatch
+local AllowSelect = CreateConVar( "bfres_allowselect", "1", bit.bor(FCVAR_REPLICATED, FCVAR_NOTIFY), "Allow/Disallow selection of spawn point using bfres window", 0, 1)
+---@diagnostic disable-next-line: param-type-mismatch
+local AllowSpawnTeleport = CreateConVar( "bfres_allowspawnteleport", "0", bit.bor(FCVAR_REPLICATED, FCVAR_NOTIFY), "Allow \"teleporting to spawn\" (respawning still alive players to spawnpoints)" )
 
+-- net request wrappers
 
+local function DoRaiseClientRespawnOverlay( ply )
+	net.Start("bfres_showUI")
+	net.Send(ply)
+end
+
+local function DoHideClientRespawnOverlay( ply )
+	net.Start("bfres_hideUI")
+	net.Send(ply)
+end
+
+-- perform first (and only, fingers crossed) load of world spawns upon entity load
 hook.Add( "InitPostEntity", "bfres_initspawns", function()
 	spawns:force_reload()
 end )
 
+-- raise the respawn overlay when the player dies
 hook.Add( "DoPlayerDeath", "bfres_ondeath", function( ply )
-	local spawns_now = spawns:fetch()
+	if ply == NULL then return end
+
 	if AllowSelect:GetBool() then
-		local st		-- staggering indicator
-		if g[ply:AccountID()] == nil or g[ply:AccountID()] == 0 then
-			-- Try again to get a log of all spawns if there are none currently here
-			if #spawns_now <= 0 then
-				GetSpawns()
-			end
-
-			-- Manage net
-			st = net.Start("bfres_showUI")	-- Activation only as required
-
-			-- Get the vectors for the spawns bc the spawns don't exist on the client
-			-- also min/max for hammer editor is 15 bit (2^15), unless you cracked it or something idk
-			for k, v in ipairs( spawns_now ) do
-				if net.BytesLeft() and net.BytesLeft() < 31 then break end -- fix for memoryfull
-				local pos = v:GetPos()
-				net.WriteInt( math.floor(pos.x), 15)
-				net.WriteInt( math.floor(pos.y), 15)
-			end
-		end
-
-		if not st then net.Start("bfres_showUI") end -- Catch-all
-
-		net.Send( ply )
-		g[ply:AccountID()] = nil
+		-- the overlay should not be shown if selection is not allowed at the moment
+		DoRaiseClientRespawnOverlay(ply)
 	end
 end )
 
+-- use custom selected spawnpoint, or random if none is defined
 hook.Add( "PlayerSelectSpawn", "bfres_selectspawn", function( ply )
 	local spawns_now = spawns:fetch()
-	if AllowSelect:GetBool() and g[ply:AccountID()] ~= nil then
+	if AllowSelect:GetBool() and g[ply:AccountID()] ~= nil and g[ply:AccountID()] ~= 0 then
 		if not spawns_now[ g[ply:AccountID()] ]:IsValid() then
-			spawns:force_reload()
-			spawns_now = spawns:fetch()
+			spawns_now = spawns:force_fetch()
 		end
 		return spawns_now[ g[ply:AccountID()] ]
 	end
+	DoHideClientRespawnOverlay(ply)
 end )
 
+-- disable spawnpoint selection if this is not sandbox
 hook.Add( "PostGamemodeLoaded", "bfres_isUsed", function()
 	-- alright, trying again
 	if engine.ActiveGamemode() ~= "sandbox" then
@@ -141,13 +148,50 @@ hook.Add( "PostGamemodeLoaded", "bfres_isUsed", function()
 	end
 end )
 
+-- disable respawning on pressing the usual keys (this is handled by respawnNow instead)
+hook.Add( "PlayerDeathThink", "bfres_respawnbind_disable", function (ply)
+	if AllowSelect:GetBool() and (ply:KeyPressed( IN_ATTACK ) or ply:KeyPressed( IN_ATTACK2 ) or ply:KeyPressed( IN_JUMP )) then
+		return false
+	end
+end )
+
+net.Receive( "bfres_requestSpawns", function( len, ply )
+	local spawns_now = spawns:fetch()
+	-- Try again to get a log of all spawns if there are none currently here
+	if #spawns_now <= 0 then
+		spawns_now = spawns:force_fetch()
+	end
+
+	print("[bfres] Providing " .. #spawns_now .. " spawnpoints for " .. ply:Nick())
+
+	-- Manage net
+	net.Start("bfres_handleSpawns")
+
+	-- Get the vectors for the spawns bc the spawns don't exist on the client
+	-- also min/max for hammer editor is 15 bit (2^15), unless you cracked it or something idk
+	for k, v in ipairs( spawns_now ) do
+		--if net.BytesLeft() and net.BytesLeft() < 31 then break end -- fix for memoryfull
+		local pos = v:GetPos()
+		net.WriteInt( math.floor(pos.x), 15)
+		net.WriteInt( math.floor(pos.y), 15)
+	end
+
+	net.Send( ply )
+end )
+
 net.Receive( "bfres_respawnIndex", function( len, ply )
+	if !AllowSelect:GetBool() then error("A client attempted to set their respawn point while bfres_allowselect is false!") end
+	if len < 8 then error("A client sent bfres_respawnIndex without payload!") end
+	
 	local d = net.ReadUInt( 8 )
 	g[ply:AccountID()] = d
 end )
 
 net.Receive( "bfres_respawnNow", function( len, ply )
-	if not ply:Alive() then	-- whoopsies (issue 1, teleportation exploit)
+	if (not ply:Alive()) or AllowSpawnTeleport:GetBool() then	-- whoopsies (issue 1, teleportation exploit)
 		ply:Spawn()
+	else
+		print("[bfres] Rejected " .. ply:Nick() .. "'s respawn attempt")
 	end
 end )
+
