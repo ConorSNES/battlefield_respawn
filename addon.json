@@ -1,0 +1,13 @@
+{
+  "title": "Spawnpoint Selector (battlefield_respawn)",
+  "type": "tool",
+  "tags": [ "fun" ],
+  "ignore": [
+    "README.md",
+    ".github/*",
+    ".screenshots/*",
+    ".vscode/*",
+    ".git/*",
+    "thumbs.db"
+  ]
+}
