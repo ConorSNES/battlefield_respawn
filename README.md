@@ -1,23 +1,32 @@
-# Battlefield-ish respawn
-A mod for Garry's Mod that allows you to explicitly select one of the spawnpoints on a map to respawn to
+# Spawnpoint Selector (battlefield_respawn)
+
+|![respawn menu on gm_abberation](./.screenshots/gm_abberation.jpg)|![respawn menu on gm_construct](./.screenshots/gm_construct.jpg)|![respawn menu on gm_blackwoods3](./.screenshots/gm_blackwoods3.jpg)|
+|---|---|---|
+
+A mod for Garry's Mod that allows you to select your spawn point.
 
 (c) ConorSNES 2023-2026
 
+internal name: *bfres* (**b**attle**f**ield_**res**pawn)
+
 ## Description
-When a player dies, they can select a spawnpoint on a visual map popup. Upon initiating a respawn, they respawn at the selected point.
-This mod is designated for use in sandbox/sandbox derived only as use in others is unstable (may cause bugs related to net messages). 
-The mod will automatically deactivate if the gamemode is not sandbox.
+
+Allows selecting a particular spawn point to respawn from via a visual interface. On death, pressing the secondary attack button (defualt bind on m+kbd is *Right Mouse Button*) will open the overlay.
+
+All config is available under `utilities/user/Respawn Menu Settings` and `utilities/admin/Respawn Menu Settings`. Alternatively, the CVAR values may be manipulated directly.
 
 ### CVARs
 
 |name|desc|type|is server?|
 |---|---|---|---|
 |bfres_allowselect|Enable/disable use of spawnpoint selection|boolean|**Yes**|
-|bfres_showui|Should UI be shown on death? (Your preference of spawnpoint will be saved)|boolean||
-|bfres_uiscale|Scale of UI relative to screen space|numeric||
-|bfres_retakemap|Retake the map the next time the UI is shown|trigger||
-|bfres_resetspawn|Reset spawn preference. If you have none selected, you will fall back to the typical random spawn selection|trigger||
-|bfres_reset|Fully reset client-side UI|trigger||
+|bfres_allowspawnteleport|Enable/disable respawning while players are alive|boolean|**Yes**|
+|bfres_showui|Enable/disable hint text at bottom of screen on death|boolean||
+|bfres_uiscale|Scale of spawn picker relative to screen space|numeric||
+|bfres_openspawn|Open spawn picker now|trigger||
+|bfres_retakemap|Retake the map the next time spawn picker is shown|trigger||
+|bfres_resetspawn|Reset spawn preference|trigger||
+|bfres_requestRespawn|Attempt to respawn now (see bfres_allowspawnteleport)|trigger||
 
 ## Known issues
 - Addon is nonfunctional on gamemodes other than sandbox
