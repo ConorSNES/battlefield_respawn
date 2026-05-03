@@ -99,12 +99,7 @@ function coords_derived.derive(onLoad)
 			maxis = math.max(finalx, finaly, maxis)
 		end
 		-- The scale has a minimum of 1000
-		print("maxis : " .. maxis)
-		print("minis : " .. minis)
 		coords_derived._inner.map_scale = math.max(maxis, -minis, 0) + 100
-		print("map_scale : " .. coords_derived._inner.map_scale)
-
-
 
 		onLoad(coords_derived._inner)
 	end)
